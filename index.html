@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>OAuth Redirect</title>
+</head>
+<body>
+  <h2>OAuth Redirect Page</h2>
+  <script>
+    // URL パラメータの code を取得して表示（必要に応じて Discord Bot で使用）
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    document.body.innerHTML += `<p>Code: ${code}</p>`;
+  </script>
+</body>
+</html>
