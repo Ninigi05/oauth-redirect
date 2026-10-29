@@ -1,16 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>OAuth Redirect</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 外部への読み込み・送信を禁止し、URL（code を含む）を Referer で漏らさない -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <title>Gmail 認証コード</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; color: #1e293b; }
+    code { display: block; padding: .75rem; background: #f1f5f9; border-radius: .5rem; word-break: break-all; user-select: all; }
+    button { margin-top: .75rem; padding: .5rem 1rem; border: 0; border-radius: .5rem; background: #0891b2; color: #fff; font-weight: bold; cursor: pointer; }
+    .error { color: #be123c; }
+  </style>
 </head>
 <body>
-  <h2>OAuth Redirect Page</h2>
+  <h2>Gmail 認証コード</h2>
+  <p id="message">認証コードを取得しています…</p>
+  <code id="code" hidden></code>
+  <button id="copy" type="button" hidden>コピー</button>
+
   <script>
-    // URL パラメータの code を取得して表示（必要に応じて Discord Bot で使用）
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
-    document.body.innerHTML += `<p>Code: ${code}</p>`;
+    const error = params.get('error');
+    const message = document.getElementById('message');
+    const codeEl = document.getElementById('code');
+    const copyBtn = document.getElementById('copy');
+
+    // URL 由来の値は必ず textContent で表示する（HTML として解釈させない）
+    if (code) {
+      message.textContent = 'このコードをコピーして、Discord の /mail setcode または Web 画面に貼り付けてください。';
+      codeEl.textContent = code;
+      codeEl.hidden = false;
+      copyBtn.hidden = false;
+      copyBtn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(code);
+          copyBtn.textContent = 'コピーしました';
+        } catch (e) {
+          copyBtn.textContent = 'コードを選択してコピーしてください';
+        }
+      });
+    } else {
+      message.className = 'error';
+      message.textContent = error
+        ? `認証に失敗しました: ${error}`
+        : '認証コードが見つかりません。最初からやり直してください。';
+    }
+
+    // code を含む URL を履歴に残さない
+    history.replaceState(null, '', window.location.pathname);
   </script>
 </body>
 </html>
